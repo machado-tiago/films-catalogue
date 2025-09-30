@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import model.Avaliacao;
 import model.Movie;
 import model.Usuario;
+import repository.AvaliacaoRepository;
 import repository.MovieRepository;
 import repository.UsuarioRepository;
 
@@ -20,6 +21,9 @@ public class AvaliacaoService {
     @Inject
     UsuarioRepository usuarioRepository;
 
+    @Inject
+    AvaliacaoRepository avaliavaoRepository;
+
     public Avaliacao avaliar(Long idFilme, int nota, Long idUsuario) {
         Avaliacao avaliacao = new Avaliacao();
         return movieService.buscarPorId(idFilme)
@@ -30,19 +34,13 @@ public class AvaliacaoService {
                         usuario -> {
                             avaliacao.setUsuario(usuario);
                             avaliacao.setMovie(movie);
-                            avaliacao.setDataAvaliacao(LocalDateTime.now());
                             avaliacao.setNota(nota);
-
+                            avaliacao.setDataAvaliacao(LocalDateTime.now());
+                            avaliavaoRepository.persist(avaliacao);
                             return avaliacao;
                             })
                         .orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
                 })
                 .orElseThrow(()-> new RuntimeException("Filme não encontrado"));
-
-    }
-
-    public BigDecimal calcularMediaAvaliacoes(Long idFilme) {
-
-        return BigDecimal.ZERO;
     }
 }
