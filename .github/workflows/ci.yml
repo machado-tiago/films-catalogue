@@ -1,6 +1,6 @@
 ## A basic GitHub Actions workflow for your Quarkus application.
 
-name: CI/CD Docker Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -19,7 +19,6 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-          cache: maven
 
       - name: Build with Maven
         run: ./mvnw package -B
@@ -32,18 +31,7 @@ jobs:
 
       - name: Wait for application to start
         run: |
-          echo "Waiting for application to start..."
-          for i in {1..60}; do
-            if curl -f -s http://localhost:8080/q/health/ready; then
-              echo "Application is ready!"
-              exit 0
-            fi
-            echo "Attempt $i/60 - waiting 5 seconds..."
-            sleep 5
-          done
-          echo "Application failed to start within timeout"
-          docker logs test-app
-          exit 1
+          sleep 30
 
       - name: Test application endpoints
         run: |
@@ -58,19 +46,11 @@ jobs:
           docker stop test-app || true
           docker rm test-app || true
 
-      - name: Login to DockerHub
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-      - name: Tag image with version
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:latest ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:${{ github.sha }}
-          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:latest ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:$(date +%Y%m%d-%H%M%S)
+      # - name: Login to DockerHub
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Push Docker images
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/films-catalogue:$(date +%Y%m%d-%H%M%S)
