@@ -2,25 +2,33 @@ package model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Movie {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+public class Avaliacao {
+    @Id
+    @GeneratedValue
     private Long id;
-    private String titulo;
-    private String diretor;
-    private int anoLancamento;
-    private String genero;
+
+    @ManyToOne
+    private Usuario usuario;
+
+    @ManyToOne
+    private Movie movie;
+
+    private Integer nota; // ex: 1 a 10
+
+    private LocalDateTime dataAvaliacao;
 }
+

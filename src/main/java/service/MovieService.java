@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import model.Movie;
 import repository.MovieRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
