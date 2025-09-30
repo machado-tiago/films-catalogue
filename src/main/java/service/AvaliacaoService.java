@@ -22,7 +22,7 @@ public class AvaliacaoService {
     UsuarioRepository usuarioRepository;
 
     @Inject
-    AvaliacaoRepository avaliavaoRepository;
+    AvaliacaoRepository avaliavacaoRepository;
 
     public Avaliacao avaliar(Long idFilme, int nota, Long idUsuario) {
         Avaliacao avaliacao = new Avaliacao();
@@ -36,7 +36,7 @@ public class AvaliacaoService {
                             avaliacao.setMovie(movie);
                             avaliacao.setNota(nota);
                             avaliacao.setDataAvaliacao(LocalDateTime.now());
-                            avaliavaoRepository.persist(avaliacao);
+                            avaliavacaoRepository.persist(avaliacao);
                             return avaliacao;
                             })
                         .orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
