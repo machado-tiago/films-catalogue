@@ -35,8 +35,6 @@ jobs:
 
       - name: Test application endpoints
         run: |
-#          echo "Testing health endpoint..."
-#          curl -f http://localhost:8080/q/health
           echo "Testing application endpoint..."
           curl -f http://localhost:8080/films || echo "Films endpoint may require specific setup"
 
