@@ -758,3 +758,45 @@ SELECT
     'Países Representados', 
     COUNT(DISTINCT pais)::text 
 FROM Usuario;
+
+-- Pergunta 1: Quais os 5 filmes mais populares?
+CREATE OR REPLACE VIEW vw_top5_filmes_populares AS
+SELECT 
+    m.titulo,
+    m.diretor,
+    m.anoLancamento,
+    m.genero,
+    COUNT(a.id) as total_avaliacoes,
+    ROUND(AVG(a.nota), 2) as nota_media
+FROM Movie m
+JOIN Avaliacao a ON m.id = a.movie_id
+GROUP BY m.id, m.titulo, m.diretor, m.anoLancamento, m.genero
+ORDER BY total_avaliacoes DESC
+LIMIT 5;
+
+-- Pergunta 2: Qual gênero tem a melhor avaliação média?
+CREATE OR REPLACE VIEW vw_melhor_genero AS
+SELECT 
+    m.genero,
+    ROUND(AVG(a.nota), 2) as nota_media,
+    COUNT(a.id) as total_avaliacoes,
+    COUNT(DISTINCT m.id) as total_filmes
+FROM Movie m
+JOIN Avaliacao a ON m.id = a.movie_id
+GROUP BY m.genero
+ORDER BY nota_media DESC
+LIMIT 1;
+
+-- Pergunta 3: Qual país assiste mais filmes?
+CREATE OR REPLACE VIEW vw_pais_mais_ativo AS
+SELECT 
+    u.pais,
+    COUNT(a.id) as total_avaliacoes,
+    COUNT(DISTINCT u.id) as total_usuarios,
+    COUNT(DISTINCT a.movie_id) as filmes_assistidos,
+    ROUND(AVG(a.nota), 2) as nota_media
+FROM Usuario u
+JOIN Avaliacao a ON u.id = a.usuario_id
+GROUP BY u.pais
+ORDER BY total_avaliacoes DESC
+LIMIT 1;
