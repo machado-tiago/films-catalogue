@@ -1,63 +1,60 @@
 # films-catalogue
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
-
 If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
-
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw quarkus:dev
-```
-
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
-## Packaging and running the application
+# Configuração Nginx
+- arquivo `nginx.conf`
 
-The application can be packaged using:
-
-```shell script
+# Compilar a aplicação Java
 ./mvnw package
+
+# Criar a imagem Docker (automatizado no GithubActions, com push para DockerHub)
+docker build -f src/main/docker/Dockerfile.jvm -t machado-tiago/films-catalogue:latest .
+
+# Executar
+## 1. Iniciar PostgreSQL (roda usando imagem oficial pronta)
+docker run -d --name films-db -e POSTGRES_DB=filmsdb -e POSTGRES_USER=films -e POSTGRES_PASSWORD=films123 -p 5432:5432 -v films-data:/var/lib/postgresql/data postgres:15-alpine
+
+## 2. Iniciar aplicação
+docker run -d --name films-app -p 8080:8080 machado-tiago/films-catalogue:latest
+
+## 3. Criar rede
+docker network create films-net 2>nul
+docker network connect films-net films-db
+docker network connect films-net films-app
+
+## 4. Iniciar Nginx aplicando configuração (roda usando imagem oficial pronta)
+docker run -d --name films-nginx --network films-net -p 80:80 -v "%cd%\nginx.conf:/etc/nginx/conf.d/default.conf" nginx:alpine
+
+# Acessar
+- Aplicação: http://localhost (porta 80 por padrão)
+- Para parar: `docker stop films-nginx films-app films-db`
+- Para limpar: `docker rm films-nginx films-app films-db`
+
+# Scripts - Films Catalogue
+## `csv_to_sql_all.py`
+**Função:** Converte todos os CSVs do Data Lake para comandos SQL INSERT
+
+**Entrada:**
+- `data-lake/movies.csv`
+- `data-lake/users.csv`
+- `data-lake/ratings.csv`
+
+**Saída:**
+- `import.sql`
+
+## Como Usar
+
+### Script Python
+```bash
+cd "c:\Desenvolvimento\14_GIT_LOCAL\ADA\films-catalogue"
+python src\main\resources\scripts\csv_to_sql_all.py
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+### Import
+O `import.sql` é executado automaticamente pelo Quarkus:
+```bash
+.\mvnw quarkus:dev
 ```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/films-catalogue-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Validate object properties (field, getter) and method parameters for your beans (REST, CDI, Jakarta Persistence)
-- Camel MapStruct ([guide](https://camel.apache.org/camel-quarkus/latest/reference/extensions/mapstruct.html)): Type Conversion using Mapstruct
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Jacoco - Code Coverage ([guide](https://quarkus.io/guides/tests-with-coverage)): Jacoco test coverage support
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
