@@ -1,8 +1,5 @@
-# films-catalogue
-
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+# Documentação da API
+Você pode acessar a documentação da API (Swagger UI) em: `http://<HOST>/q/swagger-ui/`
 
 # Configuração Nginx
 - arquivo `nginx.conf`
@@ -80,3 +77,18 @@ O `import.sql` é executado automaticamente pelo Quarkus:
 ```bash
 .\mvnw quarkus:dev
 ```
+
+# Acesso ao banco de dados
+docker exec -it films-db psql -U films -d filmsdb
+Isso abre o console interativo do PostgreSQL (psql).
+
+films-db → nome do container do PostgreSQL
+-U films → usuário
+-d filmsdb → banco que criamos
+
+## Comandos úteis no psql
+\dt → lista todas as tabelas
+\dv → lista todas as views no schema padrão (normalmente public).
+\d+ nome_da_view → mostra definição da view
+SELECT * FROM usuario;  -- mostra registros da tabela 'usuario'
+\q → sai do console
