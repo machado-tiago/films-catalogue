@@ -655,38 +655,34 @@ INSERT INTO Avaliacao (id, usuario_id, movie_id, nota, dataAvaliacao) VALUES (50
 
 
 -- ===============================================
--- 📊 DATA MART - VIEWS ANALÍTICAS
+-- DATA MART - VIEWS ANALÍTICAS
 -- ===============================================
 
--- 🏆 VIEW: Top 10 filmes mais bem avaliados por gênero
+-- VIEW: Top 10 filmes mais bem avaliados por gênero
 CREATE OR REPLACE VIEW vw_top_filmes_por_genero AS
 WITH ranking_por_genero AS (
     SELECT 
         m.genero,
         m.titulo,
-        m.diretor,
-        m.anoLancamento,
         AVG(a.nota) as nota_media,
         COUNT(a.id) as total_avaliacoes,
         ROW_NUMBER() OVER (PARTITION BY m.genero ORDER BY AVG(a.nota) DESC, COUNT(a.id) DESC) as ranking
     FROM Movie m
     LEFT JOIN Avaliacao a ON m.id = a.movie_id
-    GROUP BY m.id, m.genero, m.titulo, m.diretor, m.anoLancamento
+    GROUP BY m.id, m.genero, m.titulo
     HAVING COUNT(a.id) > 0
 )
 SELECT 
     genero,
     ranking as posicao,
     titulo,
-    diretor,
-    anoLancamento,
     ROUND(nota_media, 2) as nota_media,
     total_avaliacoes
 FROM ranking_por_genero
 WHERE ranking <= 10
 ORDER BY genero, ranking;
 
--- 📊 VIEW: Nota média por faixa etária dos usuários
+-- VIEW: Nota média por faixa etária dos usuários
 CREATE OR REPLACE VIEW vw_nota_por_faixa_etaria AS
 SELECT 
     CASE 
@@ -699,22 +695,18 @@ SELECT
     COUNT(DISTINCT u.id) as total_usuarios,
     COUNT(a.id) as total_avaliacoes,
     ROUND(AVG(a.nota), 2) as nota_media,
-    MIN(a.nota) as nota_minima,
-    MAX(a.nota) as nota_maxima
 FROM Usuario u
 LEFT JOIN Avaliacao a ON u.id = a.usuario_id
 GROUP BY faixa_etaria
 ORDER BY nota_media DESC;
 
--- 🌍 VIEW: Número de avaliações por país
+-- VIEW: Número de avaliações por país
 CREATE OR REPLACE VIEW vw_avaliacoes_por_pais AS
 SELECT 
     u.pais,
-    COUNT(DISTINCT u.id) as total_usuarios,
     COUNT(a.id) as total_avaliacoes,
-    ROUND(AVG(a.nota), 2) as nota_media,
-    ROUND(COUNT(a.id) * 1.0 / COUNT(DISTINCT u.id), 1) as avaliacoes_por_usuario,
-    COUNT(DISTINCT a.movie_id) as filmes_distintos_assistidos
+    COUNT(DISTINCT u.id) as total_usuarios,
+    COUNT(DISTINCT a.movie_id) as filmes
 FROM Usuario u
 LEFT JOIN Avaliacao a ON u.id = a.usuario_id
 GROUP BY u.pais
