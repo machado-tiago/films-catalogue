@@ -712,7 +712,7 @@ LEFT JOIN Avaliacao a ON u.id = a.usuario_id
 GROUP BY u.pais
 ORDER BY total_avaliacoes DESC;
 
--- 🎭 VIEW: Análise por gênero de filme
+-- VIEW: Análise por gênero de filme
 CREATE OR REPLACE VIEW vw_analise_por_genero AS
 SELECT 
     m.genero,
@@ -727,7 +727,7 @@ LEFT JOIN Avaliacao a ON m.id = a.movie_id
 GROUP BY m.genero
 ORDER BY nota_media DESC;
 
--- 📈 VIEW: Estatísticas gerais do sistema
+-- VIEW: Estatísticas gerais do sistema
 CREATE OR REPLACE VIEW vw_estatisticas_gerais AS
 SELECT 
     'Total de Filmes' as metrica, 

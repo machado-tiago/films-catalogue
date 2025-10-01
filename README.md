@@ -52,6 +52,8 @@ nginx:alpine
 - Aplicação: http://localhost (porta 80 por padrão)
 - Para parar: `docker stop films-nginx films-app films-db`
 - Para limpar: `docker rm films-nginx films-app films-db`
+- Limpar volume: `docker volume rm films-data`
+
 
 # Scripts - Films Catalogue
 ## `csv_to_sql_all.py`
